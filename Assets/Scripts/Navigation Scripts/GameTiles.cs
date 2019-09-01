@@ -57,28 +57,6 @@ public class GameTiles : MonoBehaviour
             UpdateTile(tiles[tile]);
         }
 
-        //if (!ShowDebug)
-        //{
-        //    return;
-        //}
-        //foreach (var tile in tiles.Keys)
-        //{
-        //    var t = (tiles[tile]);
-
-        //    if ((t.TileNavigationState & (int)WorldTile.TileType.Walkable) == (int)WorldTile.TileType.Walkable)
-        //    {
-        //        t.TilemapMember.SetColor(t.LocalPlace, Color.green);
-        //        //Debug.DrawLine(Tilemap.GetCellCenterWorld(t.LocalPlace), Vector3.zero, Color.green, 5);
-        //        Instantiate(DebugObject2, Tilemap.GetCellCenterWorld(t.LocalPlace), Quaternion.identity);
-        //        //Debug.DrawLine(t.WorldLocation, Vector3.zero, Color.green, 5);
-        //    }
-        //    else if ((t.TileNavigationState & (int)WorldTile.TileType.Navigateable) == (int)WorldTile.TileType.Navigateable)
-        //    {
-        //        t.TilemapMember.SetColor(t.LocalPlace, Color.yellow);
-        //        Instantiate(DebugObject, Tilemap.GetCellCenterWorld(t.LocalPlace), Quaternion.identity);
-        //        Debug.DrawLine(Tilemap.GetCellCenterWorld(t.LocalPlace), Vector3.zero, Color.yellow, 10);
-        //    }
-        //}
     }
     public void UpdateTile(Vector3 pos)
     {
