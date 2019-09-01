@@ -12,11 +12,8 @@ public class GameTiles : MonoBehaviour
     public static GameTiles instance;
     public Tilemap Tilemap;
 
-    public bool ShowDebug;
-    public GameObject DebugObject;
-    public GameObject DebugObject2;
-
     public Dictionary<Vector3, WorldTile> tiles;
+    public bool ShowDebug;
 
     private void Awake()
     {
@@ -60,28 +57,28 @@ public class GameTiles : MonoBehaviour
             UpdateTile(tiles[tile]);
         }
 
-        if (!ShowDebug)
-        {
-            return;
-        }
-        foreach (var tile in tiles.Keys)
-        {
-            var t = (tiles[tile]);
+        //if (!ShowDebug)
+        //{
+        //    return;
+        //}
+        //foreach (var tile in tiles.Keys)
+        //{
+        //    var t = (tiles[tile]);
 
-            if ((t.TileNavigationState & (int)WorldTile.TileType.Walkable) == (int)WorldTile.TileType.Walkable)
-            {
-                t.TilemapMember.SetColor(t.LocalPlace, Color.green);
-                //Debug.DrawLine(Tilemap.GetCellCenterWorld(t.LocalPlace), Vector3.zero, Color.green, 5);
-                Instantiate(DebugObject2, Tilemap.GetCellCenterWorld(t.LocalPlace), Quaternion.identity);
-                //Debug.DrawLine(t.WorldLocation, Vector3.zero, Color.green, 5);
-            }
-            else if ((t.TileNavigationState & (int)WorldTile.TileType.Navigateable) == (int)WorldTile.TileType.Navigateable)
-            {
-                t.TilemapMember.SetColor(t.LocalPlace, Color.yellow);
-                Instantiate(DebugObject, Tilemap.GetCellCenterWorld(t.LocalPlace), Quaternion.identity);
-                Debug.DrawLine(Tilemap.GetCellCenterWorld(t.LocalPlace), Vector3.zero, Color.yellow, 10);
-            }
-        }
+        //    if ((t.TileNavigationState & (int)WorldTile.TileType.Walkable) == (int)WorldTile.TileType.Walkable)
+        //    {
+        //        t.TilemapMember.SetColor(t.LocalPlace, Color.green);
+        //        //Debug.DrawLine(Tilemap.GetCellCenterWorld(t.LocalPlace), Vector3.zero, Color.green, 5);
+        //        Instantiate(DebugObject2, Tilemap.GetCellCenterWorld(t.LocalPlace), Quaternion.identity);
+        //        //Debug.DrawLine(t.WorldLocation, Vector3.zero, Color.green, 5);
+        //    }
+        //    else if ((t.TileNavigationState & (int)WorldTile.TileType.Navigateable) == (int)WorldTile.TileType.Navigateable)
+        //    {
+        //        t.TilemapMember.SetColor(t.LocalPlace, Color.yellow);
+        //        Instantiate(DebugObject, Tilemap.GetCellCenterWorld(t.LocalPlace), Quaternion.identity);
+        //        Debug.DrawLine(Tilemap.GetCellCenterWorld(t.LocalPlace), Vector3.zero, Color.yellow, 10);
+        //    }
+        //}
     }
     public void UpdateTile(Vector3 pos)
     {
@@ -94,6 +91,41 @@ public class GameTiles : MonoBehaviour
     public WorldTile GetRandomNavigateableWorldTile()
     {
         return tiles.Values.Where(x => x.Walkable).OrderBy(x => Random.Range(0, 500)).First();
+    }
+
+    /// <summary>
+    /// Sets a new tile and calls update tile
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="tile"></param>
+    public void SetNewTile(Vector3Int position, Tile tile)
+    {
+        Tilemap.SetTile(position, tile);
+
+        if (tiles.ContainsKey(position))
+        {
+            tiles[position].TileBase = tile;  
+        } else
+        {
+            var newTile = new WorldTile
+            {
+                LocalPlace = position,
+                WorldLocation = Tilemap.CellToWorld(position),
+                TileBase = Tilemap.GetTile(position),
+                TilemapMember = Tilemap,
+                Name = position.x + "," + position.y,
+                Cost = 1 // TODO: Change this with the proper cost from ruletile
+            };
+            tiles.Add(position, newTile);
+        }
+        for (int i = -1; i <= 1; i++)
+        {
+            for (int j = -1; j <= 1; j++)
+            {
+                UpdateTile(new Vector3(position.x + i, position.y + j, 0));
+            }
+        }
+        //UpdateTile(position); 
     }
 
     public void UpdateTile(WorldTile tile)
@@ -131,18 +163,24 @@ public class GameTiles : MonoBehaviour
             tile.TileNavigationState ^= tile.TileNavigationState;
         }
 
+        if (!ShowDebug)
+        {
+            return;
+        }
+
         if ((tile.TileNavigationState & (int)WorldTile.TileType.Walkable) == (int)WorldTile.TileType.Walkable)
         {
+            tile.TilemapMember.SetTileFlags(tile.LocalPlace, TileFlags.None);
             tile.TilemapMember.SetColor(tile.LocalPlace, Color.green);
-            //Debug.DrawLine(Tilemap.GetCellCenterWorld(t.LocalPlace), Vector3.zero, Color.green, 5);
-            Instantiate(DebugObject2, Tilemap.GetCellCenterWorld(tile.LocalPlace), Quaternion.identity);
-            //Debug.DrawLine(t.WorldLocation, Vector3.zero, Color.green, 5);
         }
         else if ((tile.TileNavigationState & (int)WorldTile.TileType.Navigateable) == (int)WorldTile.TileType.Navigateable)
         {
+            tile.TilemapMember.SetTileFlags(tile.LocalPlace, TileFlags.None);
             tile.TilemapMember.SetColor(tile.LocalPlace, Color.yellow);
-            Instantiate(DebugObject, Tilemap.GetCellCenterWorld(tile.LocalPlace), Quaternion.identity);
-            Debug.DrawLine(Tilemap.GetCellCenterWorld(tile.LocalPlace), Vector3.zero, Color.yellow, 10);
+        } else if ((tile.TileNavigationState == 0))
+        {
+            tile.TilemapMember.SetTileFlags(tile.LocalPlace, TileFlags.None);
+            tile.TilemapMember.SetColor(tile.LocalPlace, new Color(255,255,255,0));
         }
     }
 }
